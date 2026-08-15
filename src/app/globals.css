@@ -1,0 +1,177 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------------------------
+   Theme tokens. The app is dark by default (:root). Adding the `.light` class
+   to <html> flips the surface palette to a light theme. Surface colors are
+   consumed by Tailwind (see tailwind.config.ts) as `rgb(var(--surface-*) / a)`.
+   Channel format ("R G B") is required so Tailwind opacity modifiers work.
+--------------------------------------------------------------------------- */
+:root {
+  --surface: 7 11 22;
+  --surface-900: 10 15 30;
+  --surface-800: 14 20 36;
+  --surface-card: 17 26 46;
+  --surface-card2: 22 32 58;
+  --surface-border: 30 41 63;
+  --surface-borderlt: 36 48 77;
+
+  --background: #070b16;
+  --foreground: #e2e8f0;
+
+  /* Ambient glow accent colours (brand blue / sky) */
+  --glow-a: 37 99 235;
+  --glow-b: 56 189 248;
+}
+
+html.light {
+  --surface: 241 245 249;
+  --surface-900: 255 255 255;
+  --surface-800: 255 255 255;
+  --surface-card: 255 255 255;
+  --surface-card2: 241 245 249;
+  --surface-border: 226 232 240;
+  --surface-borderlt: 203 213 225;
+
+  --background: #f1f5f9;
+  --foreground: #0f172a;
+}
+
+html,
+body {
+  color: var(--foreground);
+  background: var(--background);
+}
+
+/* Smooth the transition when toggling themes */
+html.theme-anim,
+html.theme-anim * {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+/* -------- Light-theme text adjustments -----------------------------------
+   Most text uses Tailwind's fixed `slate` scale (light greys) tuned for a dark
+   background. On the light theme we darken the light shades so text stays
+   readable. Print pages use slate-500..900 (already dark) and are untouched.
+-------------------------------------------------------------------------- */
+html.light .text-slate-100 {
+  color: #1e293b;
+}
+html.light .text-slate-200 {
+  color: #334155;
+}
+html.light .text-slate-300 {
+  color: #475569;
+}
+html.light .text-slate-400 {
+  color: #64748b;
+}
+
+/* `text-white` is used both for headings on surfaces (should flip to dark) and
+   for text on coloured/gradient backgrounds (must stay white). Default to dark,
+   then re-assert white for anything sitting on an accent/gradient background. */
+html.light .text-white {
+  color: #0f172a;
+}
+html.light :is(.bg-brand-gradient, .bg-brand-500, .bg-brand-600, [class*='bg-gradient-to']) .text-white,
+html.light :is(.bg-brand-gradient, .bg-brand-500, .bg-brand-600, [class*='bg-gradient-to']).text-white {
+  color: #ffffff;
+}
+
+html.light input:-webkit-autofill,
+html.light input:-webkit-autofill:hover,
+html.light input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #0f172a;
+  -webkit-box-shadow: 0 0 0px 1000px #f1f5f9 inset;
+  caret-color: #0f172a;
+}
+
+/* Native controls (date pickers, etc.) follow the theme */
+html.light input,
+html.light select,
+html.light textarea {
+  color-scheme: light;
+}
+
+/* Auth pages use a radial brand gradient tuned for dark; soften it for light. */
+html.light .bg-auth-gradient {
+  background-image: radial-gradient(1000px 500px at 15% -10%, rgba(37, 99, 235, 0.18) 0%, transparent 55%),
+    radial-gradient(900px 500px at 110% 10%, rgba(56, 189, 248, 0.16) 0%, transparent 50%),
+    linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+}
+
+/* Nicer, thinner scrollbars (dark) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #24304d transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #24304d;
+  border-radius: 9999px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: #33415f;
+}
+
+/* Autofill fix for dark inputs */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #e2e8f0;
+  -webkit-box-shadow: 0 0 0px 1000px #16203a inset;
+  caret-color: #e2e8f0;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+@layer components {
+  /* Card utility — slightly translucent so the ambient glow shows through */
+  .card {
+    @apply rounded-2xl border border-surface-border bg-surface-card/90 shadow-card backdrop-blur-sm;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Print styles — used by the /print/* document pages. The document itself is
+   a white A4 sheet; on print we hide the toolbar and remove page margins so
+   the browser's "Save as PDF" produces a clean, professional document.
+--------------------------------------------------------------------------- */
+@media print {
+  html,
+  body {
+    background: #ffffff !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-sheet {
+    box-shadow: none !important;
+    margin: 0 !important;
+    /* Exact A4 page: content is confined to a single page. */
+    width: 210mm !important;
+    max-width: 210mm !important;
+    height: 297mm !important;
+    min-height: 297mm !important;
+    max-height: 297mm !important;
+    overflow: hidden !important;
+    border-radius: 0 !important;
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+  }
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+}
+
+/* On-screen preview: render the sheet at exact A4 proportions so what you see
+   matches the printed single page. */
+.print-sheet {
+  width: 210mm;
+  min-height: 297mm;
+}
+
